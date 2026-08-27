@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# Google Cloud credentials
+*.json
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
