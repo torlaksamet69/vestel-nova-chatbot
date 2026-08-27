@@ -1,22 +1,22 @@
 # Vestel Nova Chatbot
 
-> AI-powered chatbot for querying and analyzing Vestel product review data using natural language.
+> Yapay zekâ destekli, doğal dil üzerinden Vestel ürün yorumlarının analiz edilmesini sağlayan chatbot.
 
-Vestel Nova Chatbot, Vestel ürün yorumları üzerinde doğal dil ile veri analizi yapılmasını sağlayan bir Proof of Concept (PoC) projesidir.
+Vestel Nova Chatbot, Vestel ürün yorumları üzerinde doğal dil kullanarak veri analizi yapılmasını sağlayan bir **Proof of Concept (PoC)** projesidir.
 
-Projenin temel amacı, kullanıcıların SQL bilgisine ihtiyaç duymadan ürün yorumları, sentiment sonuçları, ürünler ve kategoriler hakkında sorular sorabilmesini ve BigQuery üzerinde bulunan gerçek veriler üzerinden anlamlı cevaplar alabilmesini sağlamaktır.
+Projenin temel amacı, kullanıcıların SQL bilgisine ihtiyaç duymadan ürün yorumları, sentiment sonuçları, ürünler, kategoriler ve müşteri geri bildirimleri hakkında sorular sorabilmesini ve BigQuery üzerinde bulunan veriler üzerinden anlamlı cevaplar alabilmesini sağlamaktır.
 
 ---
 
 ## 🚀 Proje Özeti
 
-Kullanıcı, chatbot'a doğal dil kullanarak bir soru yöneltir.
+Kullanıcı chatbot'a doğal dil kullanarak bir soru yöneltir.
 
 Örneğin:
 
 > "Ürün yorumları iyi olan televizyon modellerini öner."
 
-Chatbot soruyu analiz eder ve gerekli veriye ulaşmak için uygun araçları kullanır.
+Chatbot soruyu analiz eder ve gerekli veriye ulaşmak için uygun fonksiyonları kullanır.
 
 Genel akış:
 
@@ -100,14 +100,16 @@ Bu sayede chatbot, yalnızca statik cevaplar veren bir sistem yerine gerçek ver
 
 ---
 
-# 🛠️ Teknolojiler
+# 🛠️ Kullanılan Teknolojiler
 
 | Teknoloji | Kullanım Amacı |
 |---|---|
 | Python | Backend ve chatbot mantığı |
 | Google Gemini | Doğal dil işleme ve Function Calling |
 | Google BigQuery | Ürün yorum verilerinin sorgulanması |
-| Flask | Backend REST API |
+| FastAPI | Backend REST API |
+| Uvicorn | ASGI server |
+| Pydantic | API request validation |
 | python-dotenv | Environment variable yönetimi |
 | Git / GitHub | Versiyon kontrolü ve kaynak kod yönetimi |
 
@@ -115,44 +117,41 @@ Bu sayede chatbot, yalnızca statik cevaplar veren bir sistem yerine gerçek ver
 
 # 🏗️ Proje Mimarisi
 
-Projenin backend tarafındaki temel yapı aşağıdaki bileşenlerden oluşmaktadır:
+Projenin temel backend mimarisi:
 
 ```text
-                 ┌─────────────────┐
-                 │     Client      │
-                 │   / Frontend    │
-                 └────────┬────────┘
-                          │
-                          │ HTTP POST
-                          ▼
-                 ┌─────────────────┐
-                 │      Flask      │
-                 │       API       │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │  VestelChatbot  │
-                 └────────┬────────┘
-                          │
-                          ▼
-                 ┌─────────────────┐
-                 │     Gemini      │
-                 │  Function Call  │
-                 └────────┬────────┘
-                          │
-                 ┌────────┴────────┐
-                 │                 │
-                 ▼                 ▼
-          ┌─────────────┐   ┌─────────────┐
-          │    Tools    │   │    Tools    │
-          └──────┬──────┘   └──────┬──────┘
-                 │                 │
-                 └────────┬────────┘
-                          ▼
-                 ┌─────────────────┐
-                 │    BigQuery     │
-                 └─────────────────┘
+                  ┌──────────────────┐
+                  │     Frontend     │
+                  │   / API Client   │
+                  └────────┬─────────┘
+                           │
+                           │ HTTP POST
+                           ▼
+                  ┌──────────────────┐
+                  │     FastAPI      │
+                  │       API        │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │   Gemini Client  │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │     Gemini       │
+                  │ Function Calling │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │      Tools       │
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │     BigQuery     │
+                  └──────────────────┘
 ```
 
 ---
@@ -162,35 +161,38 @@ Projenin backend tarafındaki temel yapı aşağıdaki bileşenlerden oluşmakta
 ```text
 vestel-nova-chatbot/
 │
+├── .gitignore
+├── README.md
 ├── api.py
+├── bigquery_client.py
 ├── chatbot.py
 ├── gemini_client.py
-├── bigquery_client.py
-├── test_bigquery.py
-├── .gitignore
-├── .env
-└── README.md
+├── requirements.txt
+└── test_bigquery.py
 ```
 
-> `.env` dosyası örnek yapı içerisinde gösterilmiş olsa da `.gitignore` tarafından Git repository'sine dahil edilmemektedir.
-
-### `api.py`
-
-Flask API katmanını içerir.
-
-Chatbot'a HTTP üzerinden istek gönderilmesini sağlar.
-
-Örneğin:
-
-```text
-POST /chat
-```
-
-endpoint'i üzerinden kullanıcı mesajı backend'e iletilebilir.
+> `.env` dosyası local ortamda bulunur ancak `.gitignore` tarafından Git repository'sine dahil edilmez.
 
 ---
 
-### `chatbot.py`
+## `api.py`
+
+FastAPI backend katmanını içerir.
+
+API'nin oluşturulmasını, CORS yapılandırmasını ve HTTP endpoint'lerini yönetir.
+
+Mevcut endpoint'ler:
+
+```text
+GET  /
+POST /chat
+```
+
+`/chat` endpoint'i kullanıcıdan gelen mesajı alarak Gemini tabanlı chatbot fonksiyonuna iletir.
+
+---
+
+## `chatbot.py`
 
 Chatbot'un temel iş mantığını içerir.
 
@@ -200,15 +202,17 @@ Tool çağrıları sonucunda elde edilen verilerin Gemini'ye tekrar gönderilmes
 
 ---
 
-### `gemini_client.py`
+## `gemini_client.py`
 
 Gemini client yapılandırmasını ve Gemini API ile ilgili işlemleri içerir.
 
 API key environment variable üzerinden alınır.
 
+Ayrıca Gemini'nin Function Calling mekanizmasının chatbot içerisinde kullanılmasını sağlar.
+
 ---
 
-### `bigquery_client.py`
+## `bigquery_client.py`
 
 BigQuery bağlantısı ve veri sorgulama işlemlerini içerir.
 
@@ -216,7 +220,7 @@ BigQuery bağlantısı ve veri sorgulama işlemlerini içerir.
 
 ---
 
-### `test_bigquery.py`
+## `test_bigquery.py`
 
 BigQuery bağlantısı ve sorgularını test etmek amacıyla kullanılan test dosyasıdır.
 
@@ -238,6 +242,7 @@ Tabloda kullanılan başlıca alanlar:
 - `product_display_name`
 - `product_category_name`
 - `message_body`
+- `sync_time`
 - `sentiment_analysis`
 - `attribute_sentiment_analysis`
 - `dynamic_attributes`
@@ -286,13 +291,115 @@ gibi metrikler hesaplanabilir.
 
 Sonuçları teknik SQL çıktısı olarak göstermek yerine kullanıcıya doğal dilde özetler.
 
+Örneğin:
+
+```text
+Müşteri yorumlarına göre öne çıkan televizyon modelleri arasında
+yüksek pozitif yorum oranına sahip modeller bulunmaktadır.
+```
+
+---
+
+# 🔌 API
+
+## GET `/`
+
+Backend'in çalışıp çalışmadığını kontrol etmek için kullanılır.
+
+Örnek response:
+
+```json
+{
+  "status": "ok",
+  "message": "Vestel Yorum Asistanı API çalışıyor."
+}
+```
+
+---
+
+## POST `/chat`
+
+Kullanıcı mesajını chatbot'a gönderir.
+
+Request:
+
+```json
+{
+  "message": "Ürün yorumları iyi olan televizyon modellerini öner."
+}
+```
+
+Response:
+
+```json
+{
+  "reply": "....",
+  "queries": [],
+  "thread_id": null
+}
+```
+
+---
+
+# 🔄 API Akışı
+
+Backend'e gelen bir chat isteği genel olarak şu şekilde işlenir:
+
+```text
+POST /chat
+     │
+     ▼
+  FastAPI
+     │
+     ▼
+Gemini Client
+     │
+     ▼
+  Gemini
+     │
+     ├── Tool çağrısı gerekli mi?
+     │          │
+     │          ├── Hayır ──────► Cevap
+     │          │
+     │          └── Evet
+     │                 │
+     │                 ▼
+     │              BigQuery
+     │                 │
+     │                 ▼
+     │            Tool sonucu
+     │                 │
+     │                 ▼
+     │              Gemini
+     │                 │
+     └─────────────────┘
+```
+
+---
+
+# 📊 Yapılabilecek Analizler
+
+Mevcut yapı aşağıdaki türde kullanım senaryolarını destekleyecek şekilde tasarlanmıştır:
+
+- Ürün arama
+- Kategori bazlı analiz
+- Sentiment analizi
+- Ürün karşılaştırması
+- Pozitif / negatif yorum oranlarının hesaplanması
+- Ürün bazlı yorum yoğunluğu
+- Yorumlardan ürün içgörülerinin çıkarılması
+- Zaman içerisindeki değişimlerin incelenmesi
+- Ürün özellikleriyle ilgili yorumların analiz edilmesi
+
+Analiz kapsamı kullanılan veri ve tanımlanan tool'lara bağlıdır.
+
 ---
 
 # 🔐 Environment Variables
 
 API anahtarları kaynak kod içerisinde tutulmamaktadır.
 
-Projenin ana dizininde `.env` dosyası oluşturulmalıdır:
+Projenin ana dizininde `.env` dosyası bulunmalıdır:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
@@ -355,13 +462,11 @@ Aktifleştirmek için:
 pip install -r requirements.txt
 ```
 
-> `requirements.txt` dosyası repository'de henüz bulunmuyorsa oluşturulmalıdır.
-
 ---
 
 ## 4. Environment variable'ları tanımla
 
-`.env` dosyası:
+`.env` dosyası oluştur:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
@@ -387,89 +492,62 @@ gcloud auth application-default login
 
 # ▶️ Uygulamayı Çalıştırma
 
-Flask backend'i çalıştırmak için:
+Backend'i Uvicorn ile çalıştırmak için:
 
 ```bash
-python api.py
+uvicorn api:app --reload
 ```
 
 Backend varsayılan olarak:
 
 ```text
-http://127.0.0.1:5000
+http://127.0.0.1:8000
 ```
 
-adresinde çalışabilir.
+adresinde çalışır.
 
-Chat endpoint'i:
+FastAPI tarafından otomatik oluşturulan API dokümantasyonuna:
 
 ```text
-POST /chat
+http://127.0.0.1:8000/docs
 ```
 
-şeklindedir.
+adresinden erişilebilir.
 
-Örnek istek:
+Alternatif olarak ReDoc:
 
-```json
-{
-  "message": "Ürün yorumları iyi olan televizyon modellerini öner."
-}
+```text
+http://127.0.0.1:8000/redoc
 ```
+
+adresinden kullanılabilir.
 
 ---
 
-# 🔄 API Akışı
+# 🌐 Frontend Entegrasyonu
 
-Backend'e gelen bir chat isteği genel olarak şu şekilde işlenir:
+Backend, frontend uygulamalarının HTTP üzerinden `/chat` endpoint'ine istek gönderebilmesi için REST API olarak tasarlanmıştır.
 
-```text
-POST /chat
-     │
-     ▼
-Flask
-     │
-     ▼
-VestelChatbot.ask()
-     │
-     ▼
-Gemini
-     │
-     ├── Tool çağrısı gerekli mi?
-     │          │
-     │          ├── Hayır ──────► Cevap
-     │          │
-     │          └── Evet
-     │                 │
-     │                 ▼
-     │              BigQuery
-     │                 │
-     │                 ▼
-     │           Tool sonucu
-     │                 │
-     │                 ▼
-     │              Gemini
-     │                 │
-     └─────────────────┘
+Frontend'den örnek istek:
+
+```javascript
+fetch("http://127.0.0.1:8000/chat", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        message: "Televizyonlarda en yüksek olumlu yorum oranına sahip modeller hangileri?"
+    })
+});
 ```
 
----
+Backend tarafında CORS yapılandırması ile aşağıdaki local frontend origin'lerine izin verilmektedir:
 
-# 📊 Yapılabilecek Analizler
-
-Mevcut yapı aşağıdaki türde kullanım senaryolarını destekleyecek şekilde tasarlanmıştır:
-
-- Ürün arama
-- Kategori bazlı analiz
-- Sentiment analizi
-- Ürün karşılaştırması
-- Pozitif / negatif yorum oranlarının hesaplanması
-- Ürün bazlı yorum yoğunluğu
-- Yorumlardan ürün içgörülerinin çıkarılması
-- Zaman içerisindeki değişimlerin incelenmesi
-- Ürün özellikleriyle ilgili yorumların analiz edilmesi
-
-Analiz kapsamı kullanılan veri ve tanımlanan tool'lara bağlıdır.
+```text
+http://localhost:5173
+http://127.0.0.1:5173
+```
 
 ---
 
@@ -483,9 +561,10 @@ Mevcut PoC ile:
 - Function Calling
 - BigQuery veri erişimi
 - Doğal dil ile veri sorgulama
-- Flask API
+- FastAPI REST API
 - Tool calling loop
-- Frontend/backend iletişimi
+- Frontend / backend iletişimi
+- CORS yapılandırması
 
 gibi temel bileşenler çalışır durumdadır.
 
@@ -493,9 +572,9 @@ gibi temel bileşenler çalışır durumdadır.
 
 # 🚧 Gelecek Geliştirmeler
 
-Projenin ilerleyen aşamalarında aşağıdaki geliştirmeler değerlendirilebilir:
+Projenin ilerleyen aşamalarında aşağıdaki geliştirmeler değerlendirilebilir.
 
-### Veri Analizi
+## Veri Analizi
 
 - Daha gelişmiş ürün karşılaştırmaları
 - Attribute-level sentiment analizi
@@ -503,35 +582,38 @@ Projenin ilerleyen aşamalarında aşağıdaki geliştirmeler değerlendirilebil
 - Daha gelişmiş trend analizi
 - Otomatik insight üretimi
 
-### AI Katmanı
+## AI Katmanı
 
 - Daha gelişmiş tool orchestration
 - Tool sonuçlarının daha kontrollü işlenmesi
 - Cevap doğrulama mekanizmaları
 - Daha kapsamlı conversation memory
+- Daha gelişmiş kullanıcı bağlamı yönetimi
 
-### Backend
+## Backend
 
 - Authentication / authorization
 - API rate limiting
 - Logging ve monitoring
-- Production WSGI server
+- Production ASGI server yapılandırması
 - Hata yönetiminin geliştirilmesi
+- Unit ve integration testlerinin artırılması
 
-### Frontend
+## Frontend
 
 - Gelişmiş chat deneyimi
 - Streaming cevaplar
 - Tool işlem durumlarının kullanıcıya gösterilmesi
 - Analiz sonuçları için grafik ve tablo bileşenleri
 
-### Production
+## Production
 
 - Cloud ortamına deployment
 - Secret management
 - CI/CD
 - Test coverage
 - Production monitoring
+- Ölçeklenebilir backend mimarisi
 
 ---
 
@@ -543,7 +625,7 @@ Projenin hedef kullanım alanı Vestel ekiplerinin ürün yorumlarından daha h�
 
 > "Bu kategoride müşteriler en çok hangi konudan şikayet ediyor?"
 
-veya
+veya:
 
 > "Hangi televizyon modelleri daha olumlu yorumlara sahip?"
 
@@ -551,23 +633,74 @@ gibi soruları SQL yazmadan sorabilmesi hedeflenmektedir.
 
 ---
 
-# 📌 Proje Durumu
+# 💡 Örnek Kullanım Senaryoları
 
-**Status:** Proof of Concept (PoC)
+### Ürün Önerisi
 
-**Environment:** Local Development
+```text
+Ürün yorumları iyi olan televizyon modeli öner.
+```
 
-**Backend:** Flask
+### Kategori Analizi
 
-**LLM:** Google Gemini
+```text
+Buzdolaplarında müşterilerin en çok şikayet ettiği konular neler?
+```
 
-**Data Warehouse:** Google BigQuery
+### Sentiment Analizi
 
-**Interface:** REST API
+```text
+Televizyon kategorisindeki yorumların sentiment dağılımı nedir?
+```
+
+### Ürün Karşılaştırması
+
+```text
+55UV9750 ile 55UG9750 modellerinin müşteri yorumlarını karşılaştır.
+```
+
+### Zaman Bazlı Analiz
+
+```text
+Son dönemde televizyon yorumlarında olumlu veya olumsuz bir değişim var mı?
+```
+
+Bu soruların cevapları BigQuery'deki gerçek veriler üzerinden gerçekleştirilen analizlere dayanır.
 
 ---
 
-## 📄 License
+# 📌 Proje Durumu
+
+| Alan | Durum |
+|---|---|
+| Proje tipi | Proof of Concept |
+| Backend | FastAPI |
+| ASGI Server | Uvicorn |
+| LLM | Google Gemini |
+| Veri kaynağı | Google BigQuery |
+| API | REST |
+| Function Calling | Aktif |
+| CORS | Yapılandırılmış |
+| Environment | Local Development |
+| Kaynak kod | GitHub |
+
+---
+
+# 🔒 Güvenlik Notu
+
+Repository içerisinde aşağıdaki hassas bilgilerin bulunmaması gerekir:
+
+- Gemini API key
+- Google Cloud service account credentials
+- `.env` dosyası
+- Kullanıcıya özel erişim bilgileri
+- Gizli kurum bilgileri
+
+Bu bilgiler environment variable veya uygun secret management çözümleri üzerinden sağlanmalıdır.
+
+---
+
+# 📄 License
 
 Bu proje Vestel Geleceğe Bi' Adım Staj Programı kapsamında geliştirilmiş bir PoC çalışmasıdır.
 
